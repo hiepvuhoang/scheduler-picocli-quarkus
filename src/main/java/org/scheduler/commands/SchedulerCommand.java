@@ -2,12 +2,16 @@ package org.scheduler.commands;
 
 import io.quarkus.picocli.runtime.annotations.TopCommand;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.core.MultivaluedHashMap;
+import jakarta.ws.rs.core.MultivaluedMap;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
+import org.scheduler.resources.BuildInfo;
+import org.scheduler.resources.Oauth2Resource;
 import org.scheduler.services.SchedulerService;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 
-import java.util.Base64;
+import java.util.List;
 
 @TopCommand
 @Command(name = "scheduler", mixinStandardHelpOptions = true, subcommands = { TriggerCommand.class }, requiredOptionMarker = '*')
@@ -35,10 +39,15 @@ class TriggerCommand implements Runnable {
 
     @Override
     public void run() {
-        // Basic auth
-        String basicToken = username + ":" + password;
-        String encodedBasicToken = Base64.getEncoder().encodeToString(basicToken.getBytes());
+        MultivaluedMap<String, String> params = new MultivaluedHashMap<>();
+        params.add("grant_type", "password");
+        params.add("username", username);
+        params.add("password", password);
+        Oauth2Resource token = schedulerService.getToken(params);
 
-        schedulerService.trigger(id, "Basic " + encodedBasicToken);
+        System.out.println("Starting trigger scheduler id: " + id);
+        List<BuildInfo> buildInfos = schedulerService.trigger(id, token.getAccessToken());
+        System.out.println("Successfully triggered scheduler id: " + id);
+        System.out.println("Trigger build info: " + buildInfos);
     }
 }

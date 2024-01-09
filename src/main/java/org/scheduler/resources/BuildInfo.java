@@ -30,6 +30,20 @@ public class BuildInfo {
     @JsonProperty("steps")
     private List<BuildLog> buildLogs;
 
+    @Override
+    public String toString() {
+        return "BuildInfo { " +
+                "buildNumber=" + buildNumber +
+                ", jobId=" + jobId +
+                ", buildTime=" + buildTime +
+                ", status='" + status + '\'' +
+                ", queuedAt=" + queuedAt +
+                ", startTime=" + startTime +
+                ", stopTime=" + stopTime +
+                ", buildLogs=" + buildLogs +
+                " }";
+    }
+
     public Long getBuildNumber() {
         return buildNumber;
     }
